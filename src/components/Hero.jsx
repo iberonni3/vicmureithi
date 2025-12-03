@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import SplitText from 'gsap/SplitText';
-import PolaroidScene from './PolaroidScene';
+
+// Lazy load the 3D scene to reduce initial bundle size
+const PolaroidScene = React.lazy(() => import('./PolaroidScene'));
 
 gsap.registerPlugin(SplitText);
 
@@ -128,7 +130,9 @@ const Hero = () => {
 
     return (
         <section className="hero" ref={containerRef}>
-            <PolaroidScene />
+            <Suspense fallback={<div style={{ position: 'absolute', width: '100%', height: '100%', background: 'var(--color-bg)' }} />}>
+                <PolaroidScene />
+            </Suspense>
 
             <h1
                 ref={titleRef}
