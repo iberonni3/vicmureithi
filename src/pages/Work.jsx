@@ -14,10 +14,13 @@ const tabs = [
     { id: 'kujikubali', label: 'KUJIKUBALI', count: 16 },
 ];
 
-const WorkImage = ({ src, alt }) => {
+const WorkImage = ({ src, alt, index }) => {
     const animWrapperRef = useRef(null);
     const imgRef = useRef(null);
     const [isLoaded, setIsLoaded] = useState(false);
+
+    // Eager load first 4 images for better perceived performance
+    const isPriority = index < 4;
 
     React.useLayoutEffect(() => {
         if (!isLoaded) return;
@@ -98,7 +101,8 @@ const WorkImage = ({ src, alt }) => {
                     src={src}
                     alt={alt}
                     style={{ width: '100%', height: 'auto', display: 'block' }}
-                    loading="lazy"
+                    loading={isPriority ? "eager" : "lazy"}
+                    fetchPriority={isPriority ? "high" : "auto"}
                     onLoad={() => {
                         setIsLoaded(true);
                         ScrollTrigger.refresh();
@@ -163,11 +167,12 @@ const Work = () => {
                 maxWidth: '1800px',
                 margin: '0 auto'
             }}>
-                {images.map((num) => (
+                {images.map((num, index) => (
                     <WorkImage
                         key={`${activeTab}-${num}`}
                         src={`/work_images/${activeTab}/${num}.jpg`}
                         alt={`${activeTab} ${num}`}
+                        index={index}
                     />
                 ))}
             </div>

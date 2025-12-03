@@ -28,7 +28,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
             const box = new THREE.Box3().setFromObject(scene);
             const center = box.getCenter(new THREE.Vector3());
             scene.position.sub(center);
-            
+
             // Set model initially invisible
             scene.traverse((child) => {
                 if (child.isMesh) {
@@ -153,7 +153,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
     // Animation loop for floating and mouse parallax
     useFrame((state) => {
         if (!groupRef.current) return;
-        
+
         // Control model visibility via opacity
         if (modelRef.current) {
             scene.traverse((child) => {
@@ -401,3 +401,5 @@ const PolaroidScene = () => {
 };
 
 export default PolaroidScene;
+
+useGLTF.preload(polaroidModelPath);
