@@ -10,30 +10,43 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Split Three.js and React Three Fiber into a separate chunk
-          'three-vendor': [
-            'three',
-            '@react-three/fiber',
-            '@react-three/drei',
-            '@react-three/postprocessing'
-          ],
+          if (id.includes('three') || id.includes('@react-three')) {
+            return 'three-vendor';
+          }
           // Split GSAP into its own chunk
-          'gsap-vendor': [
-            'gsap',
-            'gsap/SplitText',
-            'gsap/ScrollTrigger'
-          ],
+          if (id.includes('gsap')) {
+            return 'gsap-vendor';
+          }
           // Split React and React DOM
-          'react-vendor': [
-            'react',
-            'react-dom',
-            'react-router-dom'
-          ]
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            return 'react-vendor';
+          }
+          // Split node_modules into separate chunks
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         }
       }
     },
-    // Increase chunk size warning limit to 1000kb
-    chunkSizeWarningLimit: 1000
-  }
+    // Optimize chunk size warning limit
+    chunkSizeWarningLimit: 600,
+    // Enable source maps only for debugging (disable in production for smaller builds)
+    sourcemap: false,
+    // Minify more aggressively
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console logs in production
+        drop_debugger: true,
+      },
+    },
+  },
+  // Performance optimizations
+  server: {
+    headers: {
+      'Cache-Control': 'public, max-age=31536000',
+    },
+  },
 })
