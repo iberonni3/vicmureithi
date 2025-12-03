@@ -54,7 +54,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
 
         // CINEMATIC ENTRANCE: Camera drops from above with rotation and scale
         const entranceTl = gsap.timeline({
-            delay: 0.5,
+            delay: 0.1,
             onStart: () => {
                 // Make group visible when animation starts
                 if (groupRef.current) {
@@ -64,37 +64,37 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
             }
         });
 
-        // Animate entrance with multiple overlapping movements
+        // Animate entrance with multiple overlapping movements - faster for better UX
         entranceTl
             // Drop down with deceleration
             .to(groupRef.current.position, {
                 y: 0,
                 z: 0,
-                duration: 2.2,
-                ease: 'power4.out',
+                duration: 1.2,
+                ease: 'power3.out',
             })
             // Scale up with slight overshoot
             .to(groupRef.current.scale, {
                 x: 1.05,
                 y: 1.05,
                 z: 1.05,
-                duration: 2,
-                ease: 'back.out(1.4)',
+                duration: 1.0,
+                ease: 'back.out(1.2)',
             }, '<')
             // Rotate to final position with dramatic spin
             .to(groupRef.current.rotation, {
                 x: 0,
                 y: Math.PI,
                 z: 0,
-                duration: 2.4,
-                ease: 'power3.inOut',
+                duration: 1.3,
+                ease: 'power2.inOut',
             }, '<')
             // Settle to exact scale
             .to(groupRef.current.scale, {
                 x: 1,
                 y: 1,
                 z: 1,
-                duration: 0.4,
+                duration: 0.3,
                 ease: 'power2.inOut',
                 onComplete: () => {
                     setEntranceComplete(true);
@@ -102,7 +102,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
                     gsap.killTweensOf(groupRef.current.rotation);
                     createFlipTimeline();
                 },
-            }, '-=0.3');
+            }, '-=0.2');
 
         // Create flip timeline only AFTER entrance completes to avoid conflicts
         let flipTimeline;
@@ -338,6 +338,7 @@ const PolaroidScene = () => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isHovered, setIsHovered] = useState(false);
     const containerRef = useRef(null);
+    const contextCleanupRef = useRef(null);
 
     // Track mouse position for parallax and spotlight
     useEffect(() => {
@@ -352,13 +353,21 @@ const PolaroidScene = () => {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
-    // Fade in the entire canvas on mount - delay to prevent initial glitch
+    // Fade in the entire canvas on mount - faster for better UX
     useEffect(() => {
         if (containerRef.current) {
             gsap.to(containerRef.current,
-                { opacity: 1, duration: 1.5, ease: 'power2.inOut', delay: 0.4 }
+                { opacity: 1, duration: 0.8, ease: 'power2.inOut', delay: 0.1 }
             );
         }
+        
+        // Cleanup WebGL context handlers on unmount
+        return () => {
+            if (contextCleanupRef.current) {
+                contextCleanupRef.current();
+                contextCleanupRef.current = null;
+            }
+        };
     }, []);
 
     return (
@@ -380,10 +389,36 @@ const PolaroidScene = () => {
                     outputColorSpace: THREE.SRGBColorSpace,
                     powerPreference: "high-performance",
                     stencil: false,
-                    depth: true
+                    depth: true,
+                    preserveDrawingBuffer: false, // Better performance
+                    failIfMajorPerformanceCaveat: false
                 }}
                 onCreated={({ gl }) => {
                     gl.physicallyCorrectLights = true;
+                    
+                    // Handle WebGL context lost/restored events
+                    const handleContextLost = (event) => {
+                        event.preventDefault();
+                        console.warn('WebGL context lost. The browser will attempt to restore it automatically.');
+                    };
+                    
+                    const handleContextRestored = () => {
+                        console.log('WebGL context restored. Reloading page to reinitialize scene...');
+                        // Small delay before reload to ensure context is stable
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 100);
+                    };
+                    
+                    const canvas = gl.domElement;
+                    canvas.addEventListener('webglcontextlost', handleContextLost, false);
+                    canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
+                    
+                    // Store cleanup function in ref for component cleanup
+                    contextCleanupRef.current = () => {
+                        canvas.removeEventListener('webglcontextlost', handleContextLost, false);
+                        canvas.removeEventListener('webglcontextrestored', handleContextRestored, false);
+                    };
                 }}
             >
                 <Scene mousePosition={mousePosition} isHovered={isHovered} />

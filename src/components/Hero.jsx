@@ -24,8 +24,6 @@ const Hero = () => {
                 const split = new SplitText(titleRef.current, { type: 'chars' });
                 const chars = split.chars;
 
-                console.log('SplitText created:', chars.length, 'characters');
-
                 // Wrap each char in a container for masking effect
                 const wrappedChars = [];
                 chars.forEach((char) => {
