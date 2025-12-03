@@ -8,34 +8,10 @@ export default defineConfig({
     include: ["gsap", "gsap/SplitText", "gsap/ScrollTrigger"],
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          // Split Three.js and React Three Fiber into a separate chunk
-          if (id.includes('three') || id.includes('@react-three')) {
-            return 'three-vendor';
-          }
-          // Split GSAP into its own chunk
-          if (id.includes('gsap')) {
-            return 'gsap-vendor';
-          }
-          // Split React and React DOM
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-            return 'react-vendor';
-          }
-          // Split node_modules into separate chunks
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        }
-      }
-    },
     // Optimize chunk size warning limit
-    chunkSizeWarningLimit: 600,
-    // Enable source maps only for debugging (disable in production for smaller builds)
-    sourcemap: false,
-    // Use esbuild minifier (default, more reliable than terser)
-    minify: 'esbuild',
+    chunkSizeWarningLimit: 1000,
+    // Enable source maps for debugging (can disable later)
+    sourcemap: true,
   },
   // Performance optimizations
   server: {
