@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const tabs = [
     { id: 'cgt', label: 'CGT', count: 16 },
-    { id: 'graduation', label: 'GRADUATION', count: 15 },
+    { id: 'graduation', label: 'GRADUATION', count: 14 },
     { id: 'belk', label: 'BELK', count: 14 },
     { id: 'kujikubali', label: 'KUJIKUBALI', count: 16 },
 ];
