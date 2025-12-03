@@ -129,7 +129,7 @@ const Work = () => {
     return (
         <div className="work-page" style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
             <Navbar />
-            <div className="work-header" style={{ paddingTop: '80px', paddingBottom: '60px', textAlign: 'center' }}>
+            <div className="work-header" style={{ paddingTop: '140px', paddingBottom: '60px', textAlign: 'center' }}>
                 <h1 ref={titleRef} className="hero-title" style={{ fontSize: '4vw', fontWeight: 600, margin: 0 }}>PORTFOLIO</h1>
             </div>
 

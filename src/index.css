@@ -804,45 +804,15 @@ ul {
     font-size: 1.2rem;
   }
   
-  /* Hide bottom navbar on mobile or simplify */
+  /* Hide bottom navbar completely on mobile */
   .navbar-bottom {
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    transform: translateX(0) translateY(100px);
-    width: calc(100% - 2rem);
+    display: none !important;
   }
   
-  .navbar-bottom.visible {
-    transform: translateX(0) translateY(0);
-  }
-  
-  .nav-pill-container {
-    padding: 0.3rem;
-    height: auto;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    justify-content: center;
-  }
-  
-  .nav-logo-box {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-  }
-  
-  .nav-links-box {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .nav-links-box a {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .nav-cta-box a {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
+  /* Adjust work header spacing for mobile */
+  .work-header {
+    padding-top: 120px !important;
+    padding-bottom: 40px !important;
   }
 }
 
@@ -894,6 +864,17 @@ ul {
     padding: 0.3rem 1rem;
     font-size: 0.75rem;
   }
+  
+  /* Hide bottom navbar on small mobile */
+  .navbar-bottom {
+    display: none !important;
+  }
+  
+  /* Adjust work header spacing for small mobile */
+  .work-header {
+    padding-top: 100px !important;
+    padding-bottom: 30px !important;
+  }
 }
 
 /* About Section Responsive */
@@ -941,7 +922,10 @@ ul {
 }
 
 .work-header {
-  padding: 2rem 1rem !important;
+  padding-top: 140px !important;
+  padding-bottom: 60px !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 
 .work-header h1 {
