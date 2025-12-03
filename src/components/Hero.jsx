@@ -13,9 +13,11 @@ const Hero = () => {
     useEffect(() => {
         if (!titleRef.current || !subtitleRef.current) return;
 
+        let ctx;
+
         // Wait for fonts to load before splitting text to avoid layout shifts
         document.fonts.ready.then(() => {
-            const ctx = gsap.context(() => {
+            ctx = gsap.context(() => {
                 // Split title into characters using GSAP SplitText
                 const split = new SplitText(titleRef.current, { type: 'chars' });
                 const chars = split.chars;
@@ -104,16 +106,24 @@ const Hero = () => {
                 titleRef.current.addEventListener('mouseenter', onEnter);
                 titleRef.current.addEventListener('mouseleave', onLeave);
 
-                // Cleanup
+                // Cleanup logic for listeners is handled by GSAP context revert, 
+                // but we need to revert SplitText manually if needed, or rely on context.
+                // Since we modify DOM, context.revert() should handle most GSAP tweaks,
+                // but DOM structure changes (wrapping) persist unless we manually revert SplitText.
+                // However, SplitText.revert() restores original HTML.
+
                 return () => {
                     titleRef.current?.removeEventListener('mouseenter', onEnter);
                     titleRef.current?.removeEventListener('mouseleave', onLeave);
                     split.revert();
                 };
+
             }, containerRef);
         });
 
-        return () => ctx.revert();
+        return () => {
+            if (ctx) ctx.revert();
+        };
     }, []);
 
     return (
