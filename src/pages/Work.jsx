@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTextReveal } from '../hooks/useTextReveal';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const tabs = [
     { id: 'cgt', label: 'CGT', count: 16 },
@@ -15,43 +11,11 @@ const tabs = [
 ];
 
 const WorkImage = ({ src, alt, index }) => {
-    const animWrapperRef = useRef(null);
     const imgRef = useRef(null);
     const [isLoaded, setIsLoaded] = useState(false);
 
     // Eager load first 4 images for better perceived performance
     const isPriority = index < 4;
-
-    useEffect(() => {
-        if (!isLoaded || !animWrapperRef.current || !imgRef.current) return;
-
-        const ctx = gsap.context(() => {
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: animWrapperRef.current,
-                    start: "top 95%",
-                    toggleActions: "play none none none",
-                    once: true
-                }
-            });
-
-            tl.fromTo(animWrapperRef.current,
-                {
-                    opacity: 0,
-                    y: 30
-                },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power2.out"
-                }
-            );
-
-        }, animWrapperRef);
-
-        return () => ctx.revert();
-    }, [isLoaded, src]);
 
     // Check if image is already loaded (cached)
     useEffect(() => {
@@ -68,25 +32,32 @@ const WorkImage = ({ src, alt, index }) => {
             width: '100%'
         }}>
             <div
-                ref={animWrapperRef}
                 className="work-image-inner"
                 style={{
                     borderRadius: '0px',
                     overflow: 'hidden',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                    opacity: isLoaded ? undefined : 0
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
                 }}
             >
                 <img
                     ref={imgRef}
                     src={src}
                     alt={alt}
-                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                    style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                        opacity: isLoaded ? 1 : 0.3,
+                        transition: 'opacity 0.3s ease'
+                    }}
                     loading={isPriority ? "eager" : "lazy"}
                     fetchPriority={isPriority ? "high" : "auto"}
                     onLoad={() => {
                         setIsLoaded(true);
-                        setTimeout(() => ScrollTrigger.refresh(), 100);
+                    }}
+                    onError={(e) => {
+                        console.error('Image failed to load:', src);
+                        e.target.style.display = 'none';
                     }}
                 />
             </div>
@@ -106,22 +77,6 @@ const Work = () => {
         ease: 'power3.out',
         animateOnMount: true
     });
-
-    // Cleanup ScrollTriggers when tab changes
-    useEffect(() => {
-        ScrollTrigger.refresh();
-
-        return () => {
-            // Kill all ScrollTriggers when tab changes
-            ScrollTrigger.getAll().forEach(trigger => {
-                if (trigger.vars && trigger.vars.trigger &&
-                    containerRef.current &&
-                    containerRef.current.contains(trigger.vars.trigger)) {
-                    trigger.kill();
-                }
-            });
-        };
-    }, [activeTab]);
 
     const currentTab = tabs.find(t => t.id === activeTab);
     const images = Array.from({ length: currentTab.count }, (_, i) => i + 1);
