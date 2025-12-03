@@ -37,6 +37,7 @@ const Navbar = () => {
 
           <Link to="/" className="logo">VP.</Link>
           <ul className="nav-links">
+            <li><Link to="/">Home</Link></li>
             <li><Link to="/work">Work</Link></li>
             <li><a href={getLink("#about")}>About</a></li>
             <li><Link to="/contact">Contact</Link></li>

@@ -773,3 +773,296 @@ ul {
     grid-column: auto;
   }
 }
+
+/* ============================================
+   COMPREHENSIVE RESPONSIVE STYLES
+   ============================================ */
+
+/* Navbar Responsive */
+@media (max-width: 1024px) {
+  .navbar-top {
+    padding: 1.5rem 2rem;
+  }
+  
+  .navbar-top .nav-links {
+    gap: 2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-top {
+    padding: 1rem 1.5rem;
+  }
+  
+  .navbar-top .nav-links {
+    gap: 1.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .navbar-top .logo {
+    font-size: 1.2rem;
+  }
+  
+  /* Hide bottom navbar on mobile or simplify */
+  .navbar-bottom {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    transform: translateX(0) translateY(100px);
+    width: calc(100% - 2rem);
+  }
+  
+  .navbar-bottom.visible {
+    transform: translateX(0) translateY(0);
+  }
+  
+  .nav-pill-container {
+    padding: 0.3rem;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: center;
+  }
+  
+  .nav-logo-box {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .nav-links-box {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-links-box a {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .nav-cta-box a {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-top .nav-links {
+    gap: 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .navbar-top .logo {
+    font-size: 1.1rem;
+  }
+}
+
+/* Hero Section Responsive */
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 12vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: 100vh;
+    padding-top: 80px;
+  }
+  
+  .hero-title {
+    font-size: 15vw;
+    line-height: 0.85;
+  }
+  
+  .hero-subtitle {
+    margin-top: 1.5rem;
+  }
+  
+  .hero-pill {
+    padding: 0.4rem 1.2rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 18vw;
+  }
+  
+  .hero-pill {
+    padding: 0.3rem 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* About Section Responsive */
+@media (max-width: 1024px) {
+  .about {
+    padding: 3rem 2rem;
+  }
+  
+  .about-content {
+    gap: 3rem;
+  }
+  
+  .about-image-wrapper {
+    height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about {
+    padding: 3rem 1.5rem;
+  }
+  
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .about-image-wrapper {
+    height: 400px;
+  }
+  
+  .about-text h2 {
+    font-size: 2rem;
+  }
+  
+  .about-text p {
+    font-size: 1rem;
+  }
+}
+
+/* Work Page Responsive */
+.work-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.work-header {
+  padding: 2rem 1rem !important;
+}
+
+.work-header h1 {
+  font-size: 8vw !important;
+}
+
+.tabs-container {
+  gap: 1.5rem !important;
+  padding: 0 1rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.tabs-container button {
+  font-size: 0.9rem !important;
+  padding-bottom: 0.4rem !important;
+}
+
+.work-gallery {
+  column-count: 1 !important;
+  padding: 0 1rem !important;
+  column-gap: 2rem !important;
+}
+
+@media (min-width: 768px) {
+  .work-gallery {
+    column-count: 2 !important;
+    padding: 0 2rem !important;
+    column-gap: 3rem !important;
+  }
+  
+  .work-header h1 {
+    font-size: 4vw !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .work-gallery {
+    padding: 0 4rem !important;
+    column-gap: 4rem !important;
+  }
+}
+
+.work-image-inner {
+  width: 100% !important;
+  margin-bottom: 2rem !important;
+}
+
+/* Contact Page Responsive */
+.contact-container {
+  padding-top: 120px !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+.contact-grid {
+  grid-template-columns: 1fr !important;
+  gap: 3rem !important;
+}
+
+.contact-title {
+  font-size: 10vw !important;
+}
+
+@media (min-width: 768px) {
+  .contact-container {
+    padding-top: 150px !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+  
+  .contact-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4rem !important;
+  }
+  
+  .contact-title {
+    font-size: 5vw !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-title {
+    font-size: 12vw !important;
+    margin-bottom: 2rem !important;
+  }
+  
+  .contact-details {
+    gap: 1.5rem !important;
+  }
+  
+  .contact-info-item h3 {
+    font-size: 0.8rem !important;
+  }
+  
+  .contact-info-item a {
+    font-size: 1.2rem !important;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem !important;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    font-size: 1rem !important;
+    padding: 0.8rem 0 !important;
+  }
+  
+  button[type="submit"] {
+    padding: 0.8rem 2rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Polaroid Scene - Mobile Optimization */
+@media (max-width: 768px) {
+  .polaroid-scene-container {
+    /* Reduce complexity on mobile */
+  }
+  
+  .camera-scene-container {
+    /* Ensure it doesn't cause performance issues */
+  }
+}

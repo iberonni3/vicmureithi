@@ -45,24 +45,28 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
 
         const triggers = [];
 
-        // Set initial state IMMEDIATELY - camera above viewport, scaled down, rotated dramatically
-        // Do this synchronously before any render happens
-        gsap.set(groupRef.current.position, { y: 15, z: -8 });
-        gsap.set(groupRef.current.rotation, { x: -0.5, y: Math.PI * 1.3, z: 0.3 });
-        gsap.set(groupRef.current.scale, { x: 0.3, y: 0.3, z: 0.3 });
-        gsap.set(groupRef.current, { visible: false }); // Hide the entire group
+        // Wait for DOM and ensure ScrollTrigger is ready
+        const initAnimation = () => {
+            if (!groupRef.current) return;
 
-        // CINEMATIC ENTRANCE: Camera drops from above with rotation and scale
-        const entranceTl = gsap.timeline({
-            delay: 0.1,
-            onStart: () => {
-                // Make group visible when animation starts
-                if (groupRef.current) {
-                    groupRef.current.visible = true;
+            // Set initial state IMMEDIATELY - camera above viewport, scaled down, rotated dramatically
+            // Do this synchronously before any render happens
+            gsap.set(groupRef.current.position, { y: 15, z: -8 });
+            gsap.set(groupRef.current.rotation, { x: -0.5, y: Math.PI * 1.3, z: 0.3 });
+            gsap.set(groupRef.current.scale, { x: 0.3, y: 0.3, z: 0.3 });
+            gsap.set(groupRef.current, { visible: false }); // Hide the entire group
+
+            // CINEMATIC ENTRANCE: Camera drops from above with rotation and scale
+            const entranceTl = gsap.timeline({
+                delay: 0.1,
+                onStart: () => {
+                    // Make group visible when animation starts
+                    if (groupRef.current) {
+                        groupRef.current.visible = true;
+                    }
+                    setIsVisible(true);
                 }
-                setIsVisible(true);
-            }
-        });
+            });
 
         // Animate entrance with multiple overlapping movements - faster for better UX
         entranceTl
@@ -104,48 +108,67 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
                 },
             }, '-=0.2');
 
-        // Create flip timeline only AFTER entrance completes to avoid conflicts
-        let flipTimeline;
-        const createFlipTimeline = () => {
-            if (!groupRef.current || flipTimeline) return;
-            flipTimeline = gsap.timeline({
-                scrollTrigger: {
-                    trigger: '.hero',
-                    start: 'top top',
-                    end: 'bottom top',
-                    scrub: 0.5,
-                    onUpdate: (self) => {
-                        const progress = self.progress;
-                        // Flip at 20-30%, return at 40%
-                        if (progress >= 0.2 && progress <= 0.3) {
-                            setRotationState('flipping');
-                        } else if (progress > 0.3 && progress <= 0.4) {
-                            setRotationState('returning');
-                        } else {
-                            setRotationState('idle');
-                        }
+            // Create flip timeline only AFTER entrance completes to avoid conflicts
+            let flipTimeline;
+            const createFlipTimeline = () => {
+                if (!groupRef.current || flipTimeline) return;
+                
+                // Wait for hero element to exist
+                const heroElement = document.querySelector('.hero');
+                if (!heroElement) {
+                    // Retry after a short delay
+                    setTimeout(createFlipTimeline, 100);
+                    return;
+                }
+                
+                flipTimeline = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '.hero',
+                        start: 'top top',
+                        end: 'bottom top',
+                        scrub: 0.5,
+                        onUpdate: (self) => {
+                            const progress = self.progress;
+                            // Flip at 20-30%, return at 40%
+                            if (progress >= 0.2 && progress <= 0.3) {
+                                setRotationState('flipping');
+                            } else if (progress > 0.3 && progress <= 0.4) {
+                                setRotationState('returning');
+                            } else {
+                                setRotationState('idle');
+                            }
+                        },
+                        invalidateOnRefresh: true,
+                        refreshPriority: 1,
                     },
-                    invalidateOnRefresh: true,
-                },
-            });
-            if (flipTimeline.scrollTrigger) triggers.push(flipTimeline.scrollTrigger);
+                });
+                if (flipTimeline.scrollTrigger) triggers.push(flipTimeline.scrollTrigger);
 
-            // Flip to front view at 20%
-            flipTimeline.to(groupRef.current.rotation, {
-                y: 0,
-                duration: 0.1,
-                ease: 'power2.inOut',
-            }, 0.2);
+                // Flip to front view at 20%
+                flipTimeline.to(groupRef.current.rotation, {
+                    y: 0,
+                    duration: 0.1,
+                    ease: 'power2.inOut',
+                }, 0.2);
 
-            // Return to back view at 30%
-            flipTimeline.to(groupRef.current.rotation, {
-                y: Math.PI,
-                duration: 0.1,
-                ease: 'power2.inOut',
-            }, 0.3);
+                // Return to back view at 30%
+                flipTimeline.to(groupRef.current.rotation, {
+                    y: Math.PI,
+                    duration: 0.1,
+                    ease: 'power2.inOut',
+                }, 0.3);
+            };
         };
 
+        // Initialize animation after a short delay to ensure DOM is ready
+        const timeoutId = setTimeout(() => {
+            initAnimation();
+            // Refresh ScrollTrigger after initialization
+            ScrollTrigger.refresh();
+        }, 100);
+
         return () => {
+            clearTimeout(timeoutId);
             triggers.forEach(trigger => trigger.kill());
         };
     }, []);
