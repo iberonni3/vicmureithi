@@ -22,60 +22,43 @@ const WorkImage = ({ src, alt, index }) => {
     // Eager load first 4 images for better perceived performance
     const isPriority = index < 4;
 
-    React.useLayoutEffect(() => {
-        if (!isLoaded) return;
+    useEffect(() => {
+        if (!isLoaded || !animWrapperRef.current || !imgRef.current) return;
 
         const ctx = gsap.context(() => {
-            if (!animWrapperRef.current || !imgRef.current) return;
-
-            // Set initial states - Reduced scale to prevent "grain" look
-            gsap.set(animWrapperRef.current, {
-                clipPath: "inset(50% 50% 50% 50%)",
-                opacity: 0,
-                scale: 0.9,
-                rotationY: 10,
-            });
-            gsap.set(imgRef.current, {
-                scale: 1.1,
-                filter: "brightness(0.5) blur(4px)",
-                willChange: 'transform, filter',
-                backfaceVisibility: 'hidden'
-            });
-
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: animWrapperRef.current,
-                    start: "top 90%",
-                    toggleActions: "play none none reverse"
+                    start: "top 95%",
+                    toggleActions: "play none none none",
+                    once: true
                 }
             });
 
-            tl.to(animWrapperRef.current, {
-                clipPath: "inset(0% 0% 0% 0%)",
-                opacity: 1,
-                scale: 1,
-                rotationY: 0,
-                duration: 1.2,
-                ease: "expo.out",
-            })
-                .to(imgRef.current, {
-                    scale: 1,
-                    filter: "brightness(1) blur(0px)",
-                    duration: 1.2,
-                    ease: "power2.out",
-                }, "<0.1");
+            tl.fromTo(animWrapperRef.current,
+                {
+                    opacity: 0,
+                    y: 30
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "power2.out"
+                }
+            );
 
         }, animWrapperRef);
 
         return () => ctx.revert();
-    }, [src, isLoaded]);
+    }, [isLoaded, src]);
 
     // Check if image is already loaded (cached)
     useEffect(() => {
         if (imgRef.current && imgRef.current.complete) {
             setIsLoaded(true);
         }
-    }, []);
+    }, [src]);
 
     return (
         <div style={{
@@ -91,9 +74,7 @@ const WorkImage = ({ src, alt, index }) => {
                     borderRadius: '0px',
                     overflow: 'hidden',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                    transformStyle: 'preserve-3d',
-                    perspective: '1000px',
-                    opacity: 0 // Prevent FOUC
+                    opacity: isLoaded ? undefined : 0
                 }}
             >
                 <img
@@ -105,7 +86,7 @@ const WorkImage = ({ src, alt, index }) => {
                     fetchPriority={isPriority ? "high" : "auto"}
                     onLoad={() => {
                         setIsLoaded(true);
-                        ScrollTrigger.refresh();
+                        setTimeout(() => ScrollTrigger.refresh(), 100);
                     }}
                 />
             </div>
@@ -123,8 +104,24 @@ const Work = () => {
         stagger: 0.05,
         duration: 0.8,
         ease: 'power3.out',
-        animateOnMount: true // Animate immediately when page loads
+        animateOnMount: true
     });
+
+    // Cleanup ScrollTriggers when tab changes
+    useEffect(() => {
+        ScrollTrigger.refresh();
+
+        return () => {
+            // Kill all ScrollTriggers when tab changes
+            ScrollTrigger.getAll().forEach(trigger => {
+                if (trigger.vars && trigger.vars.trigger &&
+                    containerRef.current &&
+                    containerRef.current.contains(trigger.vars.trigger)) {
+                    trigger.kill();
+                }
+            });
+        };
+    }, [activeTab]);
 
     const currentTab = tabs.find(t => t.id === activeTab);
     const images = Array.from({ length: currentTab.count }, (_, i) => i + 1);
@@ -160,13 +157,18 @@ const Work = () => {
                 ))}
             </div>
 
-            <div className="work-gallery" ref={containerRef} style={{
-                columnCount: 2,
-                columnGap: '4rem',
-                padding: '0 4rem',
-                maxWidth: '1800px',
-                margin: '0 auto'
-            }}>
+            <div
+                key={activeTab}
+                className="work-gallery"
+                ref={containerRef}
+                style={{
+                    columnCount: 2,
+                    columnGap: '4rem',
+                    padding: '0 4rem',
+                    maxWidth: '1800px',
+                    margin: '0 auto'
+                }}
+            >
                 {images.map((num, index) => (
                     <WorkImage
                         key={`${activeTab}-${num}`}
