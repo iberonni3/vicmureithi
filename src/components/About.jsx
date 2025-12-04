@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import aboutImage from '../assets/CA6A8117.jpg';
+import { getOptimizedImageUrl } from '../lib/supabaseClient';
 import { useTextReveal } from '../hooks/useTextReveal';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -56,7 +56,7 @@ const About = () => {
         const ctx = gsap.context(() => {
             // Check if refs are ready
             if (!imageWrapperRef.current || !imageRef.current || !textRef.current) return;
-            
+
             const imgElement = imageRef.current.querySelector('img');
             if (!imgElement) return;
 
@@ -127,12 +127,18 @@ const About = () => {
         return () => ctx.revert();
     }, []);
 
+    const aboutImageUrl = getOptimizedImageUrl('about/CA6A8117.jpg', {
+        width: 1200,
+        quality: 90,
+        format: 'origin',
+    });
+
     return (
         <section className="about" ref={sectionRef} id="about">
             <div className="about-content">
                 <div className="about-image-wrapper" ref={imageWrapperRef}>
                     <div className="about-image" ref={imageRef}>
-                        <img src={aboutImage} alt="Vic Passiani" />
+                        <img src={aboutImageUrl} alt="Vic Passiani" />
                     </div>
                 </div>
                 <div className="about-text" ref={textRef}>

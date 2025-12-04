@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useTextReveal } from '../hooks/useTextReveal';
+import { getOptimizedImageUrl } from '../lib/supabaseClient';
 
 const tabs = [
     { id: 'cgt', label: 'CGT', count: 16 },
@@ -10,9 +11,20 @@ const tabs = [
     { id: 'kujikubali', label: 'KUJIKUBALI', count: 16 },
 ];
 
-const WorkImage = ({ src, alt, index }) => {
+const WorkImage = ({ src, alt, index, folder }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
+
+    // Generate optimized Supabase URL
+    const imageNum = index + 1;
+    const supabasePath = `work_images/${folder}/${imageNum}.jpg`;
+
+    // Get optimized URL with transformations
+    const optimizedUrl = getOptimizedImageUrl(supabasePath, {
+        width: 1200,      // Max width for retina displays
+        quality: 85,      // Good balance of quality/size
+        format: 'origin', // Use 'webp' for better compression (or 'origin' for JPEG)
+    });
 
     // Eager load first 6 images for better perceived performance
     const isPriority = index < 6;
@@ -22,17 +34,17 @@ const WorkImage = ({ src, alt, index }) => {
         const img = new Image();
         img.onload = () => setIsLoaded(true);
         img.onerror = () => setHasError(true);
-        img.src = src;
+        img.src = optimizedUrl;
 
         // Check if already cached
         if (img.complete && img.naturalHeight !== 0) {
             setIsLoaded(true);
         }
-    }, [src]);
+    }, [optimizedUrl]);
 
     // Handle image error with retry
     const handleImageError = (e) => {
-        console.warn('Image failed to load:', src);
+        console.warn('Image failed to load:', optimizedUrl);
         setHasError(true);
         // Retry loading after 1 second
         setTimeout(() => {
@@ -42,16 +54,16 @@ const WorkImage = ({ src, alt, index }) => {
                     setIsLoaded(true);
                     setHasError(false);
                     if (e.target) {
-                        e.target.src = src + '?t=' + Date.now();
+                        e.target.src = optimizedUrl + '?t=' + Date.now();
                     }
                 };
-                retryImg.src = src + '?t=' + Date.now();
+                retryImg.src = optimizedUrl + '?t=' + Date.now();
             }
         }, 1000);
     };
 
     return (
-        <div 
+        <div
             style={{
                 breakInside: 'avoid',
                 marginBottom: '4rem',
@@ -71,7 +83,7 @@ const WorkImage = ({ src, alt, index }) => {
             >
                 {!hasError ? (
                     <img
-                        src={src}
+                        src={optimizedUrl}
                         alt={alt}
                         style={{
                             width: '100%',
@@ -171,7 +183,7 @@ const Work = () => {
                 {images.map((num, index) => (
                     <WorkImage
                         key={`${activeTab}-${num}`}
-                        src={`/work_images/${activeTab}/${num}.jpg`}
+                        folder={activeTab}
                         alt={`${activeTab} ${num}`}
                         index={index}
                     />
