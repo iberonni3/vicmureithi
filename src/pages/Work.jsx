@@ -12,54 +12,22 @@ const tabs = [
 ];
 
 const WorkImage = ({ src, alt, index, folder }) => {
-    const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
 
     // Generate optimized Supabase URL
     const imageNum = index + 1;
     const supabasePath = `work_images/${folder}/${imageNum}.jpg`;
 
-    // Get optimized URL with transformations
+    // Get optimized URL
     const optimizedUrl = getOptimizedImageUrl(supabasePath, {
-        width: 1200,      // Max width for retina displays
-        quality: 85,      // Good balance of quality/size
-        format: 'origin', // Use 'webp' for better compression (or 'origin' for JPEG)
+        width: 1200,
+        quality: 85,
+        format: 'origin',
     });
 
-    // Eager load first 6 images for better perceived performance
-    const isPriority = index < 6;
-
-    // Check if image is already loaded (cached)
-    useEffect(() => {
-        const img = new Image();
-        img.onload = () => setIsLoaded(true);
-        img.onerror = () => setHasError(true);
-        img.src = optimizedUrl;
-
-        // Check if already cached
-        if (img.complete && img.naturalHeight !== 0) {
-            setIsLoaded(true);
-        }
-    }, [optimizedUrl]);
-
-    // Handle image error with retry
     const handleImageError = (e) => {
         console.warn('Image failed to load:', optimizedUrl);
         setHasError(true);
-        // Retry loading after 1 second
-        setTimeout(() => {
-            if (!isLoaded) {
-                const retryImg = new Image();
-                retryImg.onload = () => {
-                    setIsLoaded(true);
-                    setHasError(false);
-                    if (e.target) {
-                        e.target.src = optimizedUrl + '?t=' + Date.now();
-                    }
-                };
-                retryImg.src = optimizedUrl + '?t=' + Date.now();
-            }
-        }, 1000);
     };
 
     return (
@@ -89,13 +57,8 @@ const WorkImage = ({ src, alt, index, folder }) => {
                             width: '100%',
                             height: 'auto',
                             display: 'block',
-                            opacity: isLoaded ? 1 : 0.3,
-                            transition: 'opacity 0.3s ease',
                         }}
-                        loading={isPriority ? "eager" : "lazy"}
-                        fetchPriority={isPriority ? "high" : "auto"}
-                        decoding="async"
-                        onLoad={() => setIsLoaded(true)}
+                        loading="eager"
                         onError={handleImageError}
                     />
                 ) : (
@@ -119,6 +82,7 @@ const WorkImage = ({ src, alt, index, folder }) => {
 
 const Work = () => {
     const [activeTab, setActiveTab] = useState(tabs[0].id);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Text Reveal Animation for Title
     const titleRef = useTextReveal({
@@ -137,6 +101,33 @@ const Work = () => {
 
     const currentTab = tabs.find(t => t.id === activeTab);
     const images = Array.from({ length: currentTab.count }, (_, i) => i + 1);
+
+    // Preload images when tab changes
+    useEffect(() => {
+        setIsLoading(true);
+
+        const preloadImage = (num) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const supabasePath = `work_images/${activeTab}/${num}.jpg`;
+                const url = getOptimizedImageUrl(supabasePath, {
+                    width: 1200,
+                    quality: 85,
+                    format: 'origin',
+                });
+
+                img.onload = () => resolve();
+                img.onerror = () => resolve(); // Resolve even on error to avoid blocking
+                img.src = url;
+            });
+        };
+
+        Promise.all(images.map(num => preloadImage(num)))
+            .then(() => {
+                // Small delay to ensure smooth transition
+                setTimeout(() => setIsLoading(false), 100);
+            });
+    }, [activeTab]);
 
     return (
         <div className="work-page" style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -169,26 +160,61 @@ const Work = () => {
                 ))}
             </div>
 
-            <div
-                key={activeTab}
-                className="work-gallery"
-                style={{
-                    columnCount: 2,
-                    columnGap: '4rem',
-                    padding: '0 4rem',
-                    maxWidth: '1800px',
-                    margin: '0 auto',
-                }}
-            >
-                {images.map((num, index) => (
-                    <WorkImage
-                        key={`${activeTab}-${num}`}
-                        folder={activeTab}
-                        alt={`${activeTab} ${num}`}
-                        index={index}
-                    />
-                ))}
-            </div>
+            {isLoading ? (
+                <div style={{
+                    height: '50vh',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                }}>
+                    <div className="loading-spinner" style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '3px solid #eee',
+                        borderTop: '3px solid #1a1a1a',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <span style={{ fontSize: '0.9rem', color: '#666', letterSpacing: '0.05em' }}>LOADING GALLERY...</span>
+                    <style>{`
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            ) : (
+                <div
+                    key={activeTab}
+                    className="work-gallery"
+                    style={{
+                        columnCount: 2,
+                        columnGap: '4rem',
+                        padding: '0 4rem',
+                        maxWidth: '1800px',
+                        margin: '0 auto',
+                        opacity: 0,
+                        animation: 'fadeIn 0.5s ease forwards'
+                    }}
+                >
+                    <style>{`
+                        @keyframes fadeIn {
+                            from { opacity: 0; transform: translateY(20px); }
+                            to { opacity: 1; transform: translateY(0); }
+                        }
+                    `}</style>
+                    {images.map((num, index) => (
+                        <WorkImage
+                            key={`${activeTab}-${num}`}
+                            folder={activeTab}
+                            alt={`${activeTab} ${num}`}
+                            index={index}
+                        />
+                    ))}
+                </div>
+            )}
 
             <Footer />
         </div>
