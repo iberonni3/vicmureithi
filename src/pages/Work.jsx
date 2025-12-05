@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useTextReveal } from '../hooks/useTextReveal';
 import { getCloudinaryImageUrl } from '../lib/cloudinaryClient';
+import gsap from 'gsap';
 
 const tabs = [
     { id: 'cgt', label: 'CGT', count: 16 },
@@ -14,6 +15,8 @@ const tabs = [
 const WorkImage = ({ alt, index, folder }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
+    const containerRef = useRef(null);
+    const imageRef = useRef(null);
 
     // Generate Cloudinary URL
     const imageNum = index + 1;
@@ -23,7 +26,6 @@ const WorkImage = ({ alt, index, folder }) => {
     if (cloudName) {
         imageUrl = getCloudinaryImageUrl(folder, imageNum, { width: 1200 });
     } else {
-        // Fallback to local if no Cloudinary config
         imageUrl = `/work_images/${folder}/${imageNum}.jpg`;
     }
 
@@ -32,7 +34,6 @@ const WorkImage = ({ alt, index, folder }) => {
     };
 
     const handleImageError = () => {
-        // Only warn if we were trying to load from Cloudinary
         if (cloudName) {
             console.warn('Cloudinary image failed, falling back to local:', imageUrl);
             setHasError(true);
@@ -40,11 +41,35 @@ const WorkImage = ({ alt, index, folder }) => {
         setIsLoaded(true);
     };
 
+    // Animation effect when loaded
+    useEffect(() => {
+        if (isLoaded && containerRef.current && imageRef.current) {
+            gsap.fromTo(imageRef.current,
+                {
+                    opacity: 0,
+                    y: 30,
+                    scale: 0.95,
+                    filter: 'blur(10px)'
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    filter: 'blur(0px)',
+                    duration: 0.8,
+                    ease: "power3.out",
+                    delay: index % 3 * 0.1 // Stagger effect based on column position
+                }
+            );
+        }
+    }, [isLoaded, index]);
+
     // Eager load first 4 images, lazy load the rest
     const loadingStrategy = index < 4 ? "eager" : "lazy";
 
     return (
         <div
+            ref={containerRef}
             style={{
                 breakInside: 'avoid',
                 marginBottom: '4rem',
@@ -92,14 +117,14 @@ const WorkImage = ({ alt, index, folder }) => {
 
                 {/* Show image or fallback/error state */}
                 <img
+                    ref={imageRef}
                     src={hasError ? `/work_images/${folder}/${imageNum}.jpg` : imageUrl}
                     alt={alt}
                     style={{
                         width: '100%',
                         height: 'auto',
                         display: 'block',
-                        opacity: isLoaded ? 1 : 0,
-                        transition: 'opacity 0.5s ease',
+                        opacity: 0, // Handled by GSAP
                     }}
                     loading={loadingStrategy}
                     decoding="async"
@@ -172,17 +197,13 @@ const Work = () => {
                     padding: '0 4rem',
                     maxWidth: '1800px',
                     margin: '0 auto',
-                    animation: 'fadeIn 0.5s ease forwards'
+                    // Removed CSS animation in favor of per-image GSAP
                 }}
             >
                 <style>{`
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
-                    }
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: translateY(20px); }
-                        to { opacity: 1; transform: translateY(0); }
                     }
                 `}</style>
                 {images.map((num, index) => (

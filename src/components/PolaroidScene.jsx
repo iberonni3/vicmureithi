@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, ContactShadows, Environment } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,6 +20,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
     const [entranceComplete, setEntranceComplete] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const baseY = useRef(0); // Store base Y position for floating
+    const animationInitialized = useRef(false); // Track initialization to prevent double-firing
 
     useEffect(() => {
         if (modelRef.current) {
@@ -49,6 +49,13 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
         // Wait for DOM and ensure ScrollTrigger is ready
         const initAnimation = () => {
             if (!groupRef.current) return;
+            if (animationInitialized.current) {
+                console.log('Animation already initialized, skipping');
+                return;
+            }
+            animationInitialized.current = true;
+
+            console.log('🎬 Starting Polaroid Entrance Animation');
 
             // Set initial state IMMEDIATELY - camera above viewport, scaled down, rotated dramatically
             // Do this synchronously before any render happens
@@ -61,11 +68,15 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
             entranceTimeline = gsap.timeline({
                 delay: 0.1,
                 onStart: () => {
+                    console.log('▶️ Entrance timeline started');
                     // Make group visible when animation starts
                     if (groupRef.current) {
                         groupRef.current.visible = true;
                     }
                     setIsVisible(true);
+                },
+                onInterrupt: () => {
+                    console.warn('⚠️ Entrance timeline interrupted!');
                 }
             });
 
@@ -103,6 +114,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
                     ease: 'power2.inOut',
                     onComplete: () => {
                         if (!groupRef.current) return; // Safety check
+                        console.log('✅ Entrance complete');
                         setEntranceComplete(true);
                         // Ensure no lingering tweens on rotation before starting flip
                         gsap.killTweensOf(groupRef.current.rotation);
@@ -170,9 +182,11 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
         }, 100);
 
         return () => {
+            console.log('🧹 Cleaning up Polaroid animation');
             clearTimeout(timeoutId);
             if (entranceTimeline) entranceTimeline.kill();
             triggers.forEach(trigger => trigger.kill());
+            animationInitialized.current = false; // Reset for next mount
         };
     }, []);
 
@@ -276,7 +290,7 @@ function MouseSpotlight({ mousePosition, isHovered }) {
             penumbra={0.8}
             intensity={250}
             castShadow
-            shadow-mapSize={[1024, 1024]} // Reduced from 2048
+            shadow-mapSize={[512, 512]} // Reduced for performance
             shadow-bias={-0.0001}
             color="#ffffff"
         />
@@ -342,8 +356,8 @@ function Scene({ mousePosition, isHovered }) {
                 position={[modelPosition.x, -1.5, modelPosition.z]}
                 opacity={0.4}
                 scale={8}
-                blur={2} // Reduced blur radius
-                resolution={512} // Reduced from default (often 1024)
+                blur={2.5}
+                resolution={256} // Reduced for performance
                 far={4}
                 color="#2a3240"
             />
@@ -413,7 +427,7 @@ const PolaroidScene = () => {
                     toneMapping: THREE.ACESFilmicToneMapping,
                     toneMappingExposure: 1.2,
                     outputColorSpace: THREE.SRGBColorSpace,
-                    powerPreference: "high-performance",
+                    powerPreference: "default", // Reduced from high-performance
                     stencil: false,
                     depth: true,
                     preserveDrawingBuffer: false, // Better performance

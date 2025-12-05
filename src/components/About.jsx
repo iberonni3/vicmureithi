@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getOptimizedImageUrl } from '../lib/supabaseClient';
+import { getCloudinaryImageUrl } from '../lib/cloudinaryClient';
 import { useTextReveal } from '../hooks/useTextReveal';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -52,13 +52,32 @@ const About = () => {
         to: { opacity: 1, y: 0, filter: 'blur(0px)' }
     });
 
+    const aboutImageUrl = getCloudinaryImageUrl('about', 'profile', {
+        width: 1200
+    });
+
+    console.log('About Image URL:', aboutImageUrl); // Debug log
+
     useEffect(() => {
+        console.log('About component mounted'); // Debug log
         const ctx = gsap.context(() => {
             // Check if refs are ready
-            if (!imageWrapperRef.current || !imageRef.current || !textRef.current) return;
+            if (!imageWrapperRef.current || !imageRef.current || !textRef.current) {
+                console.warn('About refs not ready:', {
+                    wrapper: !!imageWrapperRef.current,
+                    image: !!imageRef.current,
+                    text: !!textRef.current
+                });
+                return;
+            }
 
             const imgElement = imageRef.current.querySelector('img');
-            if (!imgElement) return;
+            if (!imgElement) {
+                console.warn('About image element not found');
+                return;
+            }
+
+            console.log('Initializing About animations'); // Debug log
 
             // CINEMATIC IMAGE ENTRANCE
             const imageTl = gsap.timeline({
@@ -72,7 +91,7 @@ const About = () => {
             // Set initial states for dramatic entrance
             gsap.set(imageWrapperRef.current, {
                 clipPath: "inset(50% 50% 50% 50%)",
-                opacity: 0,
+                opacity: 0, // Ensure it starts invisible
                 scale: 0.8,
                 rotationY: 15,
             });
@@ -120,25 +139,22 @@ const About = () => {
                 }
             });
 
-            // Text animations now handled by useTextReveal hooks
-
         }, sectionRef);
 
         return () => ctx.revert();
     }, []);
-
-    const aboutImageUrl = getOptimizedImageUrl('about/CA6A8117.jpg', {
-        width: 1200,
-        quality: 90,
-        format: 'origin',
-    });
 
     return (
         <section className="about" ref={sectionRef} id="about">
             <div className="about-content">
                 <div className="about-image-wrapper" ref={imageWrapperRef}>
                     <div className="about-image" ref={imageRef}>
-                        <img src={aboutImageUrl} alt="Vic Passiani" />
+                        <img
+                            src={aboutImageUrl || '/profile.jpg'}
+                            alt="Vic Passiani"
+                            onLoad={() => console.log('About image loaded')}
+                            onError={(e) => console.error('About image failed to load', e)}
+                        />
                     </div>
                 </div>
                 <div className="about-text" ref={textRef}>
