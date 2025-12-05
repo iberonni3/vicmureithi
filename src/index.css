@@ -515,12 +515,10 @@ ul {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%);
 }
 
 .footer-container {
@@ -783,7 +781,7 @@ ul {
   .navbar-top {
     padding: 1.5rem 2rem;
   }
-  
+
   .navbar-top .nav-links {
     gap: 2rem;
     font-size: 0.9rem;
@@ -794,21 +792,21 @@ ul {
   .navbar-top {
     padding: 1rem 1.5rem;
   }
-  
+
   .navbar-top .nav-links {
     gap: 1.5rem;
     font-size: 0.85rem;
   }
-  
+
   .navbar-top .logo {
     font-size: 1.2rem;
   }
-  
+
   /* Hide bottom navbar completely on mobile */
   .navbar-bottom {
     display: none !important;
   }
-  
+
   /* Adjust work header spacing for mobile */
   .work-header {
     padding-top: 120px !important;
@@ -821,7 +819,7 @@ ul {
     gap: 1rem;
     font-size: 0.8rem;
   }
-  
+
   .navbar-top .logo {
     font-size: 1.1rem;
   }
@@ -839,16 +837,16 @@ ul {
     height: 100vh;
     padding-top: 80px;
   }
-  
+
   .hero-title {
     font-size: 15vw;
     line-height: 0.85;
   }
-  
+
   .hero-subtitle {
     margin-top: 1.5rem;
   }
-  
+
   .hero-pill {
     padding: 0.4rem 1.2rem;
     font-size: 0.8rem;
@@ -859,17 +857,17 @@ ul {
   .hero-title {
     font-size: 18vw;
   }
-  
+
   .hero-pill {
     padding: 0.3rem 1rem;
     font-size: 0.75rem;
   }
-  
+
   /* Hide bottom navbar on small mobile */
   .navbar-bottom {
     display: none !important;
   }
-  
+
   /* Adjust work header spacing for small mobile */
   .work-header {
     padding-top: 100px !important;
@@ -882,11 +880,11 @@ ul {
   .about {
     padding: 3rem 2rem;
   }
-  
+
   .about-content {
     gap: 3rem;
   }
-  
+
   .about-image-wrapper {
     height: 500px;
   }
@@ -896,20 +894,20 @@ ul {
   .about {
     padding: 3rem 1.5rem;
   }
-  
+
   .about-content {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .about-image-wrapper {
     height: 400px;
   }
-  
+
   .about-text h2 {
     font-size: 2rem;
   }
-  
+
   .about-text p {
     font-size: 1rem;
   }
@@ -955,7 +953,7 @@ ul {
     padding: 0 2rem !important;
     column-gap: 3rem !important;
   }
-  
+
   .work-header h1 {
     font-size: 4vw !important;
   }
@@ -995,12 +993,12 @@ ul {
     padding-left: 2rem !important;
     padding-right: 2rem !important;
   }
-  
+
   .contact-grid {
     grid-template-columns: 1fr 1fr !important;
     gap: 4rem !important;
   }
-  
+
   .contact-title {
     font-size: 5vw !important;
   }
@@ -1011,29 +1009,29 @@ ul {
     font-size: 12vw !important;
     margin-bottom: 2rem !important;
   }
-  
+
   .contact-details {
     gap: 1.5rem !important;
   }
-  
+
   .contact-info-item h3 {
     font-size: 0.8rem !important;
   }
-  
+
   .contact-info-item a {
     font-size: 1.2rem !important;
   }
-  
+
   .form-group label {
     font-size: 0.85rem !important;
   }
-  
+
   .form-group input,
   .form-group textarea {
     font-size: 1rem !important;
     padding: 0.8rem 0 !important;
   }
-  
+
   button[type="submit"] {
     padding: 0.8rem 2rem !important;
     font-size: 0.9rem !important;
@@ -1043,10 +1041,7 @@ ul {
 /* Polaroid Scene - Mobile Optimization */
 @media (max-width: 768px) {
   .polaroid-scene-container {
-    /* Reduce complexity on mobile */
-  }
-  
-  .camera-scene-container {
-    /* Ensure it doesn't cause performance issues */
+    /* Hide completely on mobile devices */
+    display: none !important;
   }
 }

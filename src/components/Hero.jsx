@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, Suspense } from 'react';
+import React, { useEffect, useRef, Suspense, useState } from 'react';
 import gsap from 'gsap';
 import SplitText from 'gsap/SplitText';
 
@@ -11,6 +11,22 @@ const Hero = () => {
     const containerRef = useRef(null);
     const titleRef = useRef(null);
     const subtitleRef = useRef(null);
+
+    // Mobile detection - don't load 3D on mobile devices
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        // Check on mount
+        checkMobile();
+
+        // Check on resize
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         if (!titleRef.current || !subtitleRef.current) return;
@@ -128,9 +144,11 @@ const Hero = () => {
 
     return (
         <section className="hero" ref={containerRef}>
-            <Suspense fallback={<div style={{ position: 'absolute', width: '100%', height: '100%', background: 'var(--color-bg)' }} />}>
-                <PolaroidScene />
-            </Suspense>
+            {!isMobile && (
+                <Suspense fallback={<div style={{ position: 'absolute', width: '100%', height: '100%', background: 'var(--color-bg)' }} />}>
+                    <PolaroidScene />
+                </Suspense>
+            )}
 
             <h1
                 ref={titleRef}
