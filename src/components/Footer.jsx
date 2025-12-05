@@ -43,7 +43,7 @@ const Footer = () => {
 
                     {/* Brand Section */}
                     <div className="footer-brand" ref={brandRef}>
-                        <h2 className="footer-logo">VP.</h2>
+                        <h2 className="footer-logo">VM.</h2>
                         <p className="footer-tagline">
                             Capturing moments that tell your story.
                         </p>
