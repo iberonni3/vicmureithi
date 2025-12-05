@@ -35,7 +35,7 @@ const Navbar = () => {
         <div className="nav-container">
 
 
-          <Link to="/" className="logo">VP.</Link>
+          <Link to="/" className="logo">VM.</Link>
           <ul className="nav-links">
             <li><Link to="/">Home</Link></li>
             <li><Link to="/work">Work</Link></li>
@@ -48,7 +48,7 @@ const Navbar = () => {
       {/* Bottom Navbar - Fixed/Floating Pill */}
       <nav className={`navbar-bottom ${isScrolled ? 'visible' : ''}`}>
         <div className="nav-pill-container">
-          <Link to="/" className="nav-logo-box">VP.</Link>
+          <Link to="/" className="nav-logo-box">VM.</Link>
 
           <ul className="nav-links-box">
             <li><Link to="/work">Work</Link></li>
