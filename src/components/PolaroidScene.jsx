@@ -44,6 +44,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
         if (!groupRef.current) return;
 
         const triggers = [];
+        let entranceTimeline = null;
 
         // Wait for DOM and ensure ScrollTrigger is ready
         const initAnimation = () => {
@@ -57,7 +58,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
             gsap.set(groupRef.current, { visible: false }); // Hide the entire group
 
             // CINEMATIC ENTRANCE: Camera drops from above with rotation and scale
-            const entranceTl = gsap.timeline({
+            entranceTimeline = gsap.timeline({
                 delay: 0.1,
                 onStart: () => {
                     // Make group visible when animation starts
@@ -68,51 +69,52 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
                 }
             });
 
-        // Animate entrance with multiple overlapping movements - faster for better UX
-        entranceTl
-            // Drop down with deceleration
-            .to(groupRef.current.position, {
-                y: 0,
-                z: 0,
-                duration: 1.2,
-                ease: 'power3.out',
-            })
-            // Scale up with slight overshoot
-            .to(groupRef.current.scale, {
-                x: 1.05,
-                y: 1.05,
-                z: 1.05,
-                duration: 1.0,
-                ease: 'back.out(1.2)',
-            }, '<')
-            // Rotate to final position with dramatic spin
-            .to(groupRef.current.rotation, {
-                x: 0,
-                y: Math.PI,
-                z: 0,
-                duration: 1.3,
-                ease: 'power2.inOut',
-            }, '<')
-            // Settle to exact scale
-            .to(groupRef.current.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                duration: 0.3,
-                ease: 'power2.inOut',
-                onComplete: () => {
-                    setEntranceComplete(true);
-                    // Ensure no lingering tweens on rotation before starting flip
-                    gsap.killTweensOf(groupRef.current.rotation);
-                    createFlipTimeline();
-                },
-            }, '-=0.2');
+            // Animate entrance with multiple overlapping movements - faster for better UX
+            entranceTimeline
+                // Drop down with deceleration
+                .to(groupRef.current.position, {
+                    y: 0,
+                    z: 0,
+                    duration: 1.2,
+                    ease: 'power3.out',
+                })
+                // Scale up with slight overshoot
+                .to(groupRef.current.scale, {
+                    x: 1.05,
+                    y: 1.05,
+                    z: 1.05,
+                    duration: 1.0,
+                    ease: 'back.out(1.2)',
+                }, '<')
+                // Rotate to final position with dramatic spin
+                .to(groupRef.current.rotation, {
+                    x: 0,
+                    y: Math.PI,
+                    z: 0,
+                    duration: 1.3,
+                    ease: 'power2.inOut',
+                }, '<')
+                // Settle to exact scale
+                .to(groupRef.current.scale, {
+                    x: 1,
+                    y: 1,
+                    z: 1,
+                    duration: 0.3,
+                    ease: 'power2.inOut',
+                    onComplete: () => {
+                        if (!groupRef.current) return; // Safety check
+                        setEntranceComplete(true);
+                        // Ensure no lingering tweens on rotation before starting flip
+                        gsap.killTweensOf(groupRef.current.rotation);
+                        createFlipTimeline();
+                    },
+                }, '-=0.2');
 
             // Create flip timeline only AFTER entrance completes to avoid conflicts
             let flipTimeline;
             const createFlipTimeline = () => {
                 if (!groupRef.current || flipTimeline) return;
-                
+
                 // Wait for hero element to exist
                 const heroElement = document.querySelector('.hero');
                 if (!heroElement) {
@@ -120,7 +122,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
                     setTimeout(createFlipTimeline, 100);
                     return;
                 }
-                
+
                 flipTimeline = gsap.timeline({
                     scrollTrigger: {
                         trigger: '.hero',
@@ -169,6 +171,7 @@ function PolaroidModel({ mousePosition, isHovered, onPositionUpdate }) {
 
         return () => {
             clearTimeout(timeoutId);
+            if (entranceTimeline) entranceTimeline.kill();
             triggers.forEach(trigger => trigger.kill());
         };
     }, []);
@@ -383,7 +386,7 @@ const PolaroidScene = () => {
                 { opacity: 1, duration: 0.8, ease: 'power2.inOut', delay: 0.1 }
             );
         }
-        
+
         // Cleanup WebGL context handlers on unmount
         return () => {
             if (contextCleanupRef.current) {
@@ -418,13 +421,13 @@ const PolaroidScene = () => {
                 }}
                 onCreated={({ gl }) => {
                     gl.physicallyCorrectLights = true;
-                    
+
                     // Handle WebGL context lost/restored events
                     const handleContextLost = (event) => {
                         event.preventDefault();
                         console.warn('WebGL context lost. The browser will attempt to restore it automatically.');
                     };
-                    
+
                     const handleContextRestored = () => {
                         console.log('WebGL context restored. Reloading page to reinitialize scene...');
                         // Small delay before reload to ensure context is stable
@@ -432,11 +435,11 @@ const PolaroidScene = () => {
                             window.location.reload();
                         }, 100);
                     };
-                    
+
                     const canvas = gl.domElement;
                     canvas.addEventListener('webglcontextlost', handleContextLost, false);
                     canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
-                    
+
                     // Store cleanup function in ref for component cleanup
                     contextCleanupRef.current = () => {
                         canvas.removeEventListener('webglcontextlost', handleContextLost, false);

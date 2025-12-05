@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useTextReveal } from '../hooks/useTextReveal';
-import { getOptimizedImageUrl } from '../lib/supabaseClient';
+import { getCloudinaryImageUrl } from '../lib/cloudinaryClient';
 
 const tabs = [
     { id: 'cgt', label: 'CGT', count: 16 },
@@ -11,24 +11,37 @@ const tabs = [
     { id: 'kujikubali', label: 'KUJIKUBALI', count: 16 },
 ];
 
-const WorkImage = ({ src, alt, index, folder }) => {
+const WorkImage = ({ alt, index, folder }) => {
+    const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
 
-    // Generate optimized Supabase URL
+    // Generate Cloudinary URL
     const imageNum = index + 1;
-    const supabasePath = `work_images/${folder}/${imageNum}.jpg`;
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
-    // Get optimized URL
-    const optimizedUrl = getOptimizedImageUrl(supabasePath, {
-        width: 1200,
-        quality: 85,
-        format: 'origin',
-    });
+    let imageUrl;
+    if (cloudName) {
+        imageUrl = getCloudinaryImageUrl(folder, imageNum, { width: 1200 });
+    } else {
+        // Fallback to local if no Cloudinary config
+        imageUrl = `/work_images/${folder}/${imageNum}.jpg`;
+    }
 
-    const handleImageError = (e) => {
-        console.warn('Image failed to load:', optimizedUrl);
-        setHasError(true);
+    const handleImageLoad = () => {
+        setIsLoaded(true);
     };
+
+    const handleImageError = () => {
+        // Only warn if we were trying to load from Cloudinary
+        if (cloudName) {
+            console.warn('Cloudinary image failed, falling back to local:', imageUrl);
+            setHasError(true);
+        }
+        setIsLoaded(true);
+    };
+
+    // Eager load first 4 images, lazy load the rest
+    const loadingStrategy = index < 4 ? "eager" : "lazy";
 
     return (
         <div
@@ -37,6 +50,7 @@ const WorkImage = ({ src, alt, index, folder }) => {
                 marginBottom: '4rem',
                 display: 'inline-block',
                 width: '100%',
+                position: 'relative',
             }}
         >
             <div
@@ -47,34 +61,51 @@ const WorkImage = ({ src, alt, index, folder }) => {
                     boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                     backgroundColor: '#f5f5f5',
                     minHeight: '200px',
+                    position: 'relative',
                 }}
             >
-                {!hasError ? (
-                    <img
-                        src={optimizedUrl}
-                        alt={alt}
-                        style={{
-                            width: '100%',
-                            height: 'auto',
-                            display: 'block',
-                        }}
-                        loading="eager"
-                        onError={handleImageError}
-                    />
-                ) : (
+                {/* Loading Skeleton */}
+                {!isLoaded && (
                     <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
                         width: '100%',
-                        paddingTop: '75%',
-                        backgroundColor: '#e0e0e0',
+                        height: '100%',
+                        minHeight: '300px',
+                        backgroundColor: '#f0f0f0',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#999',
-                        fontSize: '0.9rem'
+                        zIndex: 1
                     }}>
-                        Image unavailable
+                        <div className="loading-spinner" style={{
+                            width: '30px',
+                            height: '30px',
+                            border: '2px solid #ddd',
+                            borderTop: '2px solid #333',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }} />
                     </div>
                 )}
+
+                {/* Show image or fallback/error state */}
+                <img
+                    src={hasError ? `/work_images/${folder}/${imageNum}.jpg` : imageUrl}
+                    alt={alt}
+                    style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                        opacity: isLoaded ? 1 : 0,
+                        transition: 'opacity 0.5s ease',
+                    }}
+                    loading={loadingStrategy}
+                    decoding="async"
+                    onLoad={handleImageLoad}
+                    onError={handleImageError}
+                />
             </div>
         </div>
     );
@@ -82,7 +113,6 @@ const WorkImage = ({ src, alt, index, folder }) => {
 
 const Work = () => {
     const [activeTab, setActiveTab] = useState(tabs[0].id);
-    const [isLoading, setIsLoading] = useState(true);
 
     // Text Reveal Animation for Title
     const titleRef = useTextReveal({
@@ -101,33 +131,6 @@ const Work = () => {
 
     const currentTab = tabs.find(t => t.id === activeTab);
     const images = Array.from({ length: currentTab.count }, (_, i) => i + 1);
-
-    // Preload images when tab changes
-    useEffect(() => {
-        setIsLoading(true);
-
-        const preloadImage = (num) => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                const supabasePath = `work_images/${activeTab}/${num}.jpg`;
-                const url = getOptimizedImageUrl(supabasePath, {
-                    width: 1200,
-                    quality: 85,
-                    format: 'origin',
-                });
-
-                img.onload = () => resolve();
-                img.onerror = () => resolve(); // Resolve even on error to avoid blocking
-                img.src = url;
-            });
-        };
-
-        Promise.all(images.map(num => preloadImage(num)))
-            .then(() => {
-                // Small delay to ensure smooth transition
-                setTimeout(() => setIsLoading(false), 100);
-            });
-    }, [activeTab]);
 
     return (
         <div className="work-page" style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -160,61 +163,37 @@ const Work = () => {
                 ))}
             </div>
 
-            {isLoading ? (
-                <div style={{
-                    height: '50vh',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                    gap: '1rem'
-                }}>
-                    <div className="loading-spinner" style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '3px solid #eee',
-                        borderTop: '3px solid #1a1a1a',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                    }} />
-                    <span style={{ fontSize: '0.9rem', color: '#666', letterSpacing: '0.05em' }}>LOADING GALLERY...</span>
-                    <style>{`
-                        @keyframes spin {
-                            0% { transform: rotate(0deg); }
-                            100% { transform: rotate(360deg); }
-                        }
-                    `}</style>
-                </div>
-            ) : (
-                <div
-                    key={activeTab}
-                    className="work-gallery"
-                    style={{
-                        columnCount: 2,
-                        columnGap: '4rem',
-                        padding: '0 4rem',
-                        maxWidth: '1800px',
-                        margin: '0 auto',
-                        opacity: 0,
-                        animation: 'fadeIn 0.5s ease forwards'
-                    }}
-                >
-                    <style>{`
-                        @keyframes fadeIn {
-                            from { opacity: 0; transform: translateY(20px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-                    `}</style>
-                    {images.map((num, index) => (
-                        <WorkImage
-                            key={`${activeTab}-${num}`}
-                            folder={activeTab}
-                            alt={`${activeTab} ${num}`}
-                            index={index}
-                        />
-                    ))}
-                </div>
-            )}
+            <div
+                key={activeTab}
+                className="work-gallery"
+                style={{
+                    columnCount: 2,
+                    columnGap: '4rem',
+                    padding: '0 4rem',
+                    maxWidth: '1800px',
+                    margin: '0 auto',
+                    animation: 'fadeIn 0.5s ease forwards'
+                }}
+            >
+                <style>{`
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `}</style>
+                {images.map((num, index) => (
+                    <WorkImage
+                        key={`${activeTab}-${num}`}
+                        folder={activeTab}
+                        alt={`${activeTab} ${num}`}
+                        index={index}
+                    />
+                ))}
+            </div>
 
             <Footer />
         </div>
