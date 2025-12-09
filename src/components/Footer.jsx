@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Linkedin, Mail, ArrowUpRight } from 'lucide-react';
+import { Instagram, Link as LinkIcon, ArrowUpRight } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -15,10 +15,8 @@ const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     const socialLinks = [
-        { name: 'Instagram', icon: Instagram, url: 'https://instagram.com/vicmureithi' },
-        { name: 'Twitter', icon: Twitter, url: 'https://twitter.com/vicmureithi' },
-        { name: 'LinkedIn', icon: Linkedin, url: 'https://linkedin.com/in/vicmureithi' },
-        { name: 'Email', icon: Mail, url: 'mailto:hello@vicmureithi.com' }
+        { name: 'Instagram', icon: Instagram, url: 'https://www.instagram.com/mureithiiii' },
+        { name: 'Behance', icon: LinkIcon, url: 'https://www.behance.net/passtrinity' }
     ];
 
     const pageLinks = [
