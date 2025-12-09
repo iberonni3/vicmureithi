@@ -5,6 +5,7 @@ import gsap from 'gsap';
 
 const Contact = () => {
     const containerRef = useRef(null);
+    const formRef = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -22,9 +23,18 @@ const Contact = () => {
                 y: 50,
                 opacity: 0,
                 duration: 0.8,
-                stagger: 0.15,
+                stagger: 0.1,
                 ease: 'power3.out',
                 delay: 0.6
+            });
+
+            // Animate Form
+            gsap.from(formRef.current, {
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                delay: 0.8
             });
 
         }, containerRef);
@@ -45,178 +55,122 @@ const Contact = () => {
                 paddingRight: '2rem'
             }}>
 
-                {/* Centered Email Layout */}
-                <div className="contact-content" style={{
-                    textAlign: 'center',
-                    maxWidth: '900px',
-                    margin: '0 auto'
+                <div className="contact-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '6rem',
+                    alignItems: 'start'
                 }}>
 
-                    {/* Main Title */}
-                    <h1 className="contact-title" style={{
-                        fontSize: 'clamp(3rem, 8vw, 6rem)',
-                        fontWeight: 600,
-                        lineHeight: 1.1,
-                        marginBottom: '2rem',
-                        color: '#1a1a1a'
-                    }}>
-                        LET'S CREATE <br />
-                        <span style={{ color: '#999' }}>SOMETHING</span> <br />
-                        TOGETHER.
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p style={{
-                        fontSize: 'clamp(1.1rem, 2vw, 1.5rem)',
-                        color: '#666',
-                        marginBottom: '4rem',
-                        lineHeight: 1.6
-                    }} className="contact-info-item">
-                        Have a project in mind or want to collaborate? <br />
-                        I'd love to hear from you. Drop me an email and let's bring your vision to life.
-                    </p>
-
-                    {/* Email CTA Card */}
-                    <div className="contact-info-item" style={{
-                        background: 'linear-gradient(135deg, #f8f8f8 0%, #fff 100%)',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '24px',
-                        padding: 'clamp(2.5rem, 5vw, 4rem)',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.05)',
-                        transition: 'all 0.3s ease',
-                        marginBottom: '3rem'
-                    }}>
-                        <h3 style={{
-                            fontSize: '1rem',
-                            textTransform: 'uppercase',
-                            color: '#999',
-                            marginBottom: '1.5rem',
-                            letterSpacing: '2px',
-                            fontWeight: 500
+                    {/* Left Column: Text & Info */}
+                    <div className="contact-left">
+                        <h1 className="contact-title" style={{
+                            fontSize: '5vw',
+                            fontWeight: 600,
+                            lineHeight: 1.1,
+                            marginBottom: '3rem',
+                            color: '#1a1a1a'
                         }}>
-                            Email Me At
-                        </h3>
+                            LET'S CREATE <br />
+                            <span style={{ color: '#999' }}>SOMETHING</span> <br />
+                            TOGETHER.
+                        </h1>
 
-                        <a
-                            href="mailto:hello@vicmureithi.com"
-                            style={{
-                                fontSize: 'clamp(1.5rem, 3.5vw, 2.5rem)',
-                                color: '#1a1a1a',
-                                fontWeight: 600,
-                                textDecoration: 'none',
-                                display: 'inline-block',
-                                transition: 'all 0.3s ease',
-                                borderBottom: '3px solid transparent'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.target.style.color = '#ff6b35';
-                                e.target.style.borderBottomColor = '#ff6b35';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.color = '#1a1a1a';
-                                e.target.style.borderBottomColor = 'transparent';
-                            }}
-                        >
-                            hello@vicmureithi.com
-                        </a>
+                        <div className="contact-details" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <div className="contact-info-item">
+                                <h3 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: '#999', marginBottom: '0.5rem', letterSpacing: '1px' }}>Email</h3>
+                                <a href="mailto:hello@vicmureithi.com" style={{ fontSize: '1.5rem', color: '#1a1a1a', fontWeight: 500 }}>hello@vicmureithi.com</a>
+                            </div>
 
-                        <button
-                            onClick={() => window.location.href = 'mailto:hello@vicmureithi.com'}
-                            style={{
-                                marginTop: '2.5rem',
-                                padding: '1.25rem 3rem',
+                            <div className="contact-info-item">
+                                <h3 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: '#999', marginBottom: '0.5rem', letterSpacing: '1px' }}>Socials</h3>
+                                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                    <a href="#" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc' }}>Instagram</a>
+                                    <a href="#" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc' }}>Twitter</a>
+                                    <a href="#" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc' }}>LinkedIn</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Form */}
+                    <div className="contact-right">
+                        <form ref={formRef} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Name</label>
+                                <input type="text" placeholder="Your Name" style={{
+                                    width: '100%',
+                                    padding: '1rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    borderBottom: '1px solid #ccc',
+                                    fontSize: '1.2rem',
+                                    color: '#1a1a1a',
+                                    outline: 'none',
+                                    transition: 'border-color 0.3s'
+                                }}
+                                    onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
+                                    onBlur={(e) => e.target.style.borderColor = '#ccc'}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Email</label>
+                                <input type="email" placeholder="Your Email" style={{
+                                    width: '100%',
+                                    padding: '1rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    borderBottom: '1px solid #ccc',
+                                    fontSize: '1.2rem',
+                                    color: '#1a1a1a',
+                                    outline: 'none',
+                                    transition: 'border-color 0.3s'
+                                }}
+                                    onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
+                                    onBlur={(e) => e.target.style.borderColor = '#ccc'}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Message</label>
+                                <textarea placeholder="Tell me about your project..." rows="4" style={{
+                                    width: '100%',
+                                    padding: '1rem 0',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    borderBottom: '1px solid #ccc',
+                                    fontSize: '1.2rem',
+                                    color: '#1a1a1a',
+                                    outline: 'none',
+                                    resize: 'none',
+                                    transition: 'border-color 0.3s',
+                                    fontFamily: 'inherit'
+                                }}
+                                    onFocus={(e) => e.target.style.borderColor = '#1a1a1a'}
+                                    onBlur={(e) => e.target.style.borderColor = '#ccc'}
+                                ></textarea>
+                            </div>
+
+                            <button type="submit" style={{
+                                marginTop: '2rem',
+                                padding: '1rem 3rem',
                                 background: '#1a1a1a',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: '999px',
-                                fontSize: '1.1rem',
+                                fontSize: '1rem',
                                 fontWeight: 600,
                                 cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                                alignSelf: 'flex-start',
+                                transition: 'transform 0.2s'
                             }}
-                            onMouseEnter={(e) => {
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 6px 25px rgba(0,0,0,0.2)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
-                            }}
-                        >
-                            Send Email
-                        </button>
-                    </div>
-
-                    {/* Social Links */}
-                    <div className="contact-info-item" style={{
-                        paddingTop: '2rem',
-                        borderTop: '1px solid #e0e0e0'
-                    }}>
-                        <h3 style={{
-                            fontSize: '0.9rem',
-                            textTransform: 'uppercase',
-                            color: '#999',
-                            marginBottom: '1.5rem',
-                            letterSpacing: '2px'
-                        }}>
-                            Or Connect With Me
-                        </h3>
-                        <div style={{
-                            display: 'flex',
-                            gap: '2rem',
-                            justifyContent: 'center',
-                            flexWrap: 'wrap'
-                        }}>
-                            <a
-                                href="https://www.instagram.com/mureithiiii"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    fontSize: '1.2rem',
-                                    color: '#1a1a1a',
-                                    textDecoration: 'none',
-                                    padding: '0.5rem 1.5rem',
-                                    borderRadius: '999px',
-                                    border: '2px solid #e0e0e0',
-                                    transition: 'all 0.3s ease'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.borderColor = '#1a1a1a';
-                                    e.target.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.borderColor = '#e0e0e0';
-                                    e.target.style.transform = 'translateY(0)';
-                                }}
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                             >
-                                Instagram
-                            </a>
-                            <a
-                                href="https://www.behance.net/passtrinity"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    fontSize: '1.2rem',
-                                    color: '#1a1a1a',
-                                    textDecoration: 'none',
-                                    padding: '0.5rem 1.5rem',
-                                    borderRadius: '999px',
-                                    border: '2px solid #e0e0e0',
-                                    transition: 'all 0.3s ease'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.borderColor = '#1a1a1a';
-                                    e.target.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.borderColor = '#e0e0e0';
-                                    e.target.style.transform = 'translateY(0)';
-                                }}
-                            >
-                                Behance
-                            </a>
-                        </div>
+                                Send Message
+                            </button>
+                        </form>
                     </div>
 
                 </div>
