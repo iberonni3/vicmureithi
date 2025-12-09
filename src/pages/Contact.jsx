@@ -85,9 +85,8 @@ const Contact = () => {
                             <div className="contact-info-item">
                                 <h3 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: '#999', marginBottom: '0.5rem', letterSpacing: '1px' }}>Socials</h3>
                                 <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                    <a href="#" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc' }}>Instagram</a>
-                                    <a href="#" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc' }}>Twitter</a>
-                                    <a href="#" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc' }}>LinkedIn</a>
+                                    <a href="https://www.instagram.com/mureithiiii" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc', textDecoration: 'none' }}>Instagram</a>
+                                    <a href="https://www.behance.net/passtrinity" target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.1rem', color: '#1a1a1a', borderBottom: '1px solid #ccc', textDecoration: 'none' }}>Behance</a>
                                 </div>
                             </div>
                         </div>
